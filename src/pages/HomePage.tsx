@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, TrendingUp, Sparkles, Loader2 } from 'lucide-react'
+import { Play, TrendingUp, Sparkles, Loader2, RefreshCw } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { SongCard } from '@/components/SongCard'
 import { usePlayer } from '@/context/PlayerContext'
@@ -16,41 +17,50 @@ import {
 export function HomePage() {
     const navigate = useNavigate()
     const { playQueue } = usePlayer()
-    const [topSongs, setTopSongs] = useState<NormalizedSong[]>([])
-    const [playlists, setPlaylists] = useState<PlaylistItem[]>([])
-    const [loading, setLoading] = useState(true)
+    // 从 localStorage 读取缓存数据
+    const [topSongs, setTopSongs] = useState<NormalizedSong[]>(() => {
+        const cached = localStorage.getItem('home_topSongs')
+        return cached ? JSON.parse(cached) : []
+    })
+    const [playlists, setPlaylists] = useState<PlaylistItem[]>(() => {
+        const cached = localStorage.getItem('home_playlists')
+        return cached ? JSON.parse(cached) : []
+    })
+    const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        let cancelled = false
+    const fetchData = useCallback(async () => {
+        if (loading) return
+        setLoading(true)
+        try {
+            const [topRes, playlistRes] = await Promise.allSettled([
+                getTopSongs(),
+                getTopPlaylists(0, 1, 6),
+            ])
 
-        async function fetchData() {
-            setLoading(true)
-            try {
-                const [topRes, playlistRes] = await Promise.allSettled([
-                    getTopSongs(),
-                    getTopPlaylists(0, 1, 6),
-                ])
-
-                if (cancelled) return
-
-                if (topRes.status === 'fulfilled' && topRes.value.data) {
-                    const songs = topRes.value.data.slice(0, 12).map(normalizeTopSong)
-                    setTopSongs(songs)
-                }
-
-                if (playlistRes.status === 'fulfilled' && playlistRes.value.data?.special_list) {
-                    setPlaylists(playlistRes.value.data.special_list.slice(0, 6))
-                }
-            } catch (err) {
-                console.warn('Failed to fetch homepage data:', err)
-            } finally {
-                if (!cancelled) setLoading(false)
+            if (topRes.status === 'fulfilled' && topRes.value.data) {
+                const songs = topRes.value.data.slice(0, 12).map(normalizeTopSong)
+                setTopSongs(songs)
+                localStorage.setItem('home_topSongs', JSON.stringify(songs))
             }
-        }
 
-        fetchData()
-        return () => { cancelled = true }
-    }, [])
+            if (playlistRes.status === 'fulfilled' && playlistRes.value.data?.special_list) {
+                const list = playlistRes.value.data.special_list.slice(0, 6)
+                setPlaylists(list)
+                localStorage.setItem('home_playlists', JSON.stringify(list))
+            }
+        } catch (err) {
+            console.warn('Failed to fetch homepage data:', err)
+        } finally {
+            setLoading(false)
+        }
+    }, [loading])
+
+    // 首次加载（只在本地没有缓存数据时）
+    useEffect(() => {
+        if (topSongs.length === 0 && playlists.length === 0) {
+            fetchData()
+        }
+    }, [fetchData, topSongs.length, playlists.length])
 
     const recommendedSongs = topSongs.slice(0, 6)
 
@@ -130,11 +140,21 @@ export function HomePage() {
             )}
 
             {/* Playlists */}
-            {!loading && playlists.length > 0 && (
+            {playlists.length > 0 && (
                 <section>
-                    <div className="mb-5 flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-primary" />
-                        <h2 className="text-xl font-bold text-foreground">精选歌单</h2>
+                    <div className="mb-5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <TrendingUp className="h-5 w-5 text-primary" />
+                            <h2 className="text-xl font-bold text-foreground">精选歌单</h2>
+                        </div>
+                        <button
+                            onClick={() => fetchData()}
+                            disabled={loading}
+                            className="flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground disabled:opacity-50"
+                        >
+                            <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
+                            刷新
+                        </button>
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {playlists.map((pl, i) => (
