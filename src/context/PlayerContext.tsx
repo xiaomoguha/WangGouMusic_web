@@ -45,7 +45,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         isPlaying: false,
         currentTime: 0,
         duration: 0,
-        volume: 0.7,
+        volume: 1,
         queue: [],
         queueIndex: -1,
         lyrics: [],
@@ -59,7 +59,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // Create audio element once
     useEffect(() => {
         const audio = new Audio()
-        audio.volume = 0.7
+        audio.volume = 1
         audioRef.current = audio
 
         const onTimeUpdate = () => {
