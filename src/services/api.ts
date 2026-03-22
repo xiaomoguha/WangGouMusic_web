@@ -214,8 +214,24 @@ export async function getHotSearch(): Promise<{ data: { list: { keywords: HotKey
     return request(`${BASE}/search/hot`)
 }
 
-export async function getSearchSuggest(keywords: string) {
-    return request<{ data: { searchword: string }[] }>(`${BASE}/search/suggest`, { keywords })
+export interface SuggestRecord {
+    HintInfo: string
+    Hot?: number
+}
+
+export interface SuggestGroup {
+    RecordDatas: SuggestRecord[]
+    RecordCount: number
+    LableName: string
+}
+
+export interface SuggestResult {
+    status: number
+    data: SuggestGroup[]
+}
+
+export async function getSearchSuggest(keywords: string): Promise<SuggestResult> {
+    return request<SuggestResult>(`${BASE}/search/suggest`, { keywords })
 }
 
 export async function searchTwo(page = 1, pagesize = 30): Promise<SearchResult> {

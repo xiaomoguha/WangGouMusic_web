@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, X, Loader2, Trophy } from 'lucide-react'
 import { SongCard } from '@/components/SongCard'
@@ -8,6 +8,7 @@ import {
     searchTwo,
     getHotSearch,
     getTopSongs,
+    getSearchSuggest,
     normalizeSong,
     normalizeSearchTwoSong,
     normalizeTopSong,
@@ -25,10 +26,27 @@ export function SearchPage() {
     const [rankSongs, setRankSongs] = useState<NormalizedSong[]>([])
     const [loading, setLoading] = useState(false)
     const [searched, setSearched] = useState(false)
+    const [suggestions, setSuggestions] = useState<string[]>([])
+    const [showSuggestDropdown, setShowSuggestDropdown] = useState(false)
+    const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const wrapperRef = useRef<HTMLDivElement>(null)
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+                setShowSuggestDropdown(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
 
     const doSearch = useCallback(async (kw: string) => {
         setLoading(true)
         setSearched(true)
+        setShowSuggestDropdown(false)
+        setSuggestions([])
         try {
             let res
             if (!kw.trim()) {
@@ -84,9 +102,37 @@ export function SearchPage() {
             .catch(() => { })
     }, [])
 
-    // Handle input change (no auto search)
+    // Handle input change with debounced suggest
     const handleInputChange = (value: string) => {
         setQuery(value)
+        if (suggestTimer.current) clearTimeout(suggestTimer.current)
+        if (!value.trim()) {
+            setSuggestions([])
+            setShowSuggestDropdown(false)
+            return
+        }
+        suggestTimer.current = setTimeout(() => {
+            getSearchSuggest(value)
+                .then(res => {
+                    if (res.status === 1 && res.data) {
+                        const hints = res.data
+                            .flatMap(g => g.RecordDatas)
+                            .map(r => r.HintInfo)
+                            .filter(Boolean)
+                            .slice(0, 8)
+                        setSuggestions(hints)
+                        setShowSuggestDropdown(hints.length > 0)
+                    }
+                })
+                .catch(() => { })
+        }, 300)
+    }
+
+    const handleSuggestClick = (keyword: string) => {
+        setQuery(keyword)
+        setSuggestions([])
+        setShowSuggestDropdown(false)
+        doSearch(keyword)
     }
 
     const handleTagClick = (keyword: string) => {
@@ -106,27 +152,47 @@ export function SearchPage() {
 
     return (
         <div className="space-y-8 pb-8">
-            {/* Search bar */}
+            {/* Search bar - 使用 fixed 定位让下拉框脱离文档流 */}
             <div
-                className="relative"
+                ref={wrapperRef}
+                className="sticky top-0 z-50"
                 style={{ opacity: 0, animation: 'fade-in 0.4s ease-out forwards' }}
             >
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                <input
-                    type="text"
-                    value={query}
-                    onChange={e => handleInputChange(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') doSearch(query) }}
-                    placeholder="搜索歌曲、歌手、专辑..."
-                    className="w-full rounded-2xl border bg-card py-4 pl-12 pr-12 text-sm text-foreground shadow-sm transition-shadow duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:shadow-md"
-                />
-                {query && (
-                    <button
-                        onClick={() => { setQuery(''); setResults([]); setTotal(0); setSearched(false) }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
-                    >
-                        <X className="h-4 w-4" />
-                    </button>
+                <div className="relative">
+                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={e => handleInputChange(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') doSearch(query) }}
+                        onFocus={() => { if (suggestions.length > 0) setShowSuggestDropdown(true) }}
+                        placeholder="搜索歌曲、歌手、专辑..."
+                        className="w-full rounded-2xl border bg-card py-4 pl-12 pr-12 text-sm text-foreground shadow-sm transition-shadow duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:shadow-md"
+                    />
+                    {query && (
+                        <button
+                            onClick={() => { setQuery(''); setResults([]); setTotal(0); setSearched(false); setSuggestions([]); setShowSuggestDropdown(false) }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    )}
+                </div>
+
+                {/* Suggest dropdown */}
+                {showSuggestDropdown && suggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full z-[100] mt-1 max-h-[300px] overflow-y-auto rounded-xl border bg-white shadow-xl">
+                        {suggestions.map((hint, i) => (
+                            <button
+                                key={`${hint}-${i}`}
+                                onMouseDown={() => handleSuggestClick(hint)}
+                                className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-surface"
+                            >
+                                <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                                <span className="truncate">{hint}</span>
+                            </button>
+                        ))}
+                    </div>
                 )}
             </div>
 

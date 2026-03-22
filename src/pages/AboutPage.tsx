@@ -105,7 +105,7 @@ export function AboutPage() {
                 className="text-center text-sm text-muted-foreground"
                 style={{ opacity: 0, animation: 'fade-in 0.5s ease-out 0.8s forwards' }}
             >
-                Made with care. Enjoy the music.
+                Made with XJT. Enjoy the music.
             </p>
         </div>
     )
