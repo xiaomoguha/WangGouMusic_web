@@ -198,14 +198,14 @@ export function LyricsPage() {
             {/* Lyrics scroll - 手机端使用绝对定位从专辑区域下方开始 */}
             <div
                 ref={containerRef}
-                className="absolute bottom-0 left-0 right-0 top-[140px] overflow-y-auto md:relative md:top-0 md:py-[30vh]"
+                className="absolute bottom-0 left-0 right-0 top-[180px] overflow-y-auto md:relative md:top-0 md:py-[30vh]"
                 style={{
                     maskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                     WebkitMaskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                 }}
             >
                 <div className="py-4 md:py-0">
-                    <div className="space-y-3 px-2 md:space-y-4 md:px-4">
+                    <div className="space-y-3 px-2 text-center md:space-y-4 md:px-4">
                         {lyrics.map((line, i) => {
                             const isActive = i === activeIndex
                             const isPast = i < activeIndex
