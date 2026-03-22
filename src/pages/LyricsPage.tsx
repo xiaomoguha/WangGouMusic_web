@@ -28,10 +28,8 @@ export function LyricsPage() {
             const containerHeight = container.clientHeight
             const elTop = el.offsetTop
             const elHeight = el.clientHeight
-            // 手机端让高亮部分显示在屏幕下方 5% 位置（避开专辑图），桌面端居中
-            const isMobile = window.innerWidth < 768
-            const offsetRatio = isMobile ? 0.05 : 0.5
-            const scrollTarget = elTop - containerHeight * offsetRatio + elHeight / 2
+            // 高亮歌词居中显示
+            const scrollTarget = elTop - containerHeight / 2 + elHeight / 2
 
             container.scrollTo({
                 top: scrollTarget,
@@ -101,10 +99,10 @@ export function LyricsPage() {
     }
 
     return (
-        <div className="flex h-[calc(100vh-260px)] flex-col gap-6 md:h-[calc(100vh-180px)] md:flex-row md:gap-8">
-            {/* Album art side */}
+        <div className="relative h-[calc(100vh-260px)] md:flex md:h-[calc(100vh-180px)] md:gap-8">
+            {/* Album art side - 手机端固定在顶部，桌面端正常布局 */}
             <div
-                className="flex flex-col items-center justify-center pt-4 md:w-[280px] md:shrink-0"
+                className="flex flex-col items-center pb-4 pt-0 md:w-[280px] md:shrink-0 md:justify-center"
                 style={{ opacity: 0, animation: 'fade-in 0.6s ease-out forwards' }}
             >
                 <div className="relative">
@@ -197,34 +195,36 @@ export function LyricsPage() {
                 </div>
             )}
 
-            {/* Lyrics scroll */}
+            {/* Lyrics scroll - 手机端使用绝对定位从专辑区域下方开始 */}
             <div
                 ref={containerRef}
-                className="flex-1 overflow-y-auto pt-[45vh] pb-[10vh] md:py-[30vh]"
+                className="absolute bottom-0 left-0 right-0 top-[180px] overflow-y-auto md:relative md:top-0 md:py-[30vh]"
                 style={{
                     maskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                     WebkitMaskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                 }}
             >
-                <div className="space-y-3 px-2 md:space-y-4 md:px-4">
-                    {lyrics.map((line, i) => {
-                        const isActive = i === activeIndex
-                        const isPast = i < activeIndex
-                        return (
-                            <div
-                                key={`${i}-${line.time}`}
-                                ref={isActive ? activeRef : undefined}
-                                className={cn(
-                                    'lyric-line cursor-default rounded-xl px-3 py-2 text-base transition-all duration-500 md:px-4 md:py-3 md:text-xl',
-                                    isActive && 'lyric-active text-lg md:text-2xl',
-                                    isPast && 'text-muted-foreground/50',
-                                    !isActive && !isPast && 'text-muted-foreground/70'
-                                )}
-                            >
-                                {line.text}
-                            </div>
-                        )
-                    })}
+                <div className="py-4 md:py-0">
+                    <div className="space-y-3 px-2 md:space-y-4 md:px-4">
+                        {lyrics.map((line, i) => {
+                            const isActive = i === activeIndex
+                            const isPast = i < activeIndex
+                            return (
+                                <div
+                                    key={`${i}-${line.time}`}
+                                    ref={isActive ? activeRef : undefined}
+                                    className={cn(
+                                        'lyric-line cursor-default rounded-xl px-3 py-2 text-base transition-all duration-500 md:px-4 md:py-3 md:text-xl',
+                                        isActive && 'lyric-active text-lg md:text-2xl',
+                                        isPast && 'text-muted-foreground/50',
+                                        !isActive && !isPast && 'text-muted-foreground/70'
+                                    )}
+                                >
+                                    {line.text}
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             </div>
         </div>
