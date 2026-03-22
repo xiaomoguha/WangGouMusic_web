@@ -40,7 +40,7 @@ export function LyricsPage() {
     // No song playing
     if (!currentSong) {
         return (
-            <div className="flex h-[calc(100vh-180px)] flex-col items-center justify-center text-center">
+            <div className="flex h-[calc(100vh-260px)] flex-col items-center justify-center text-center md:h-[calc(100vh-180px)]">
                 <div
                     className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-surface"
                     style={{ opacity: 0, animation: 'scale-in 0.4s ease-out forwards' }}
@@ -66,11 +66,11 @@ export function LyricsPage() {
     // Loading lyrics
     if (lyricsLoading) {
         return (
-            <div className="flex h-[calc(100vh-180px)] flex-col items-center justify-center text-center">
+            <div className="flex h-[calc(100vh-260px)] flex-col items-center justify-center text-center md:h-[calc(100vh-180px)]">
                 <img
                     src={currentSong.cover}
                     alt={currentSong.title}
-                    className={cn('mb-8 h-48 w-48 rounded-full object-cover shadow-lg', isPlaying && 'vinyl-spin')}
+                    className={cn('mb-8 h-32 w-32 rounded-full object-cover shadow-lg md:h-48 md:w-48', isPlaying && 'vinyl-spin')}
                     onError={e => { (e.target as HTMLImageElement).src = '/images/album-cover-1.png' }}
                 />
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -82,33 +82,33 @@ export function LyricsPage() {
     // No lyrics available
     if (lyrics.length === 0) {
         return (
-            <div className="flex h-[calc(100vh-180px)] flex-col items-center justify-center text-center">
+            <div className="flex h-[calc(100vh-260px)] flex-col items-center justify-center text-center md:h-[calc(100vh-180px)]">
                 <img
                     src={currentSong.cover}
                     alt={currentSong.title}
-                    className={cn('mb-8 h-48 w-48 rounded-full object-cover shadow-lg', isPlaying && 'vinyl-spin')}
+                    className={cn('mb-6 h-32 w-32 rounded-full object-cover shadow-lg md:mb-8 md:h-48 md:w-48', isPlaying && 'vinyl-spin')}
                     style={{ opacity: 0, animation: 'scale-in 0.4s ease-out forwards' }}
                     onError={e => { (e.target as HTMLImageElement).src = '/images/album-cover-1.png' }}
                 />
-                <p className="text-lg font-semibold text-foreground">{currentSong.title}</p>
+                <p className="text-base font-semibold text-foreground md:text-lg">{currentSong.title}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{currentSong.artist}</p>
-                <p className="mt-6 text-sm text-muted-foreground">暂无歌词</p>
+                <p className="mt-4 text-sm text-muted-foreground md:mt-6">暂无歌词</p>
             </div>
         )
     }
 
     return (
-        <div className="flex h-[calc(100vh-180px)] gap-8">
+        <div className="flex h-[calc(100vh-260px)] flex-col gap-6 md:h-[calc(100vh-180px)] md:flex-row md:gap-8">
             {/* Album art side */}
             <div
-                className="flex w-[280px] shrink-0 flex-col items-center justify-center"
+                className="flex flex-col items-center justify-center pt-4 md:w-[280px] md:shrink-0"
                 style={{ opacity: 0, animation: 'fade-in 0.6s ease-out forwards' }}
             >
                 <div className="relative">
                     <img
                         src={currentSong.cover}
                         alt={currentSong.title}
-                        className={cn('h-56 w-56 rounded-full object-cover shadow-xl', isPlaying && 'vinyl-spin')}
+                        className={cn('h-40 w-40 rounded-full object-cover shadow-xl md:h-56 md:w-56', isPlaying && 'vinyl-spin')}
                         onError={e => { (e.target as HTMLImageElement).src = '/images/album-cover-1.png' }}
                     />
                     {isPlaying && (
@@ -124,16 +124,16 @@ export function LyricsPage() {
                         </div>
                     )}
                 </div>
-                <h2 className="mt-6 text-center text-xl font-bold text-foreground">
+                <h2 className="mt-4 text-center text-lg font-bold text-foreground md:mt-6 md:text-xl">
                     {currentSong.title}
                 </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-center text-sm text-muted-foreground">
                     {currentSong.artist}{currentSong.album ? ` · ${currentSong.album}` : ''}
                 </p>
                 {/* Playlist toggle button */}
                 <button
                     onClick={() => setShowPlaylist(!showPlaylist)}
-                    className="mt-4 flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
+                    className="mt-3 flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground md:mt-4"
                 >
                     <ListMusic className="h-4 w-4" />
                     播放列表 ({queue.length})
@@ -143,7 +143,7 @@ export function LyricsPage() {
             {/* Playlist panel */}
             {showPlaylist && (
                 <div
-                    className="w-[280px] shrink-0 rounded-2xl bg-card p-4 shadow-lg"
+                    className="w-full rounded-2xl bg-card p-4 shadow-lg md:w-[280px] md:shrink-0"
                     style={{ opacity: 0, animation: 'fade-in 0.3s ease-out forwards' }}
                 >
                     <div className="mb-3 flex items-center justify-between">
@@ -155,7 +155,7 @@ export function LyricsPage() {
                             <X className="h-4 w-4" />
                         </button>
                     </div>
-                    <div className="max-h-[calc(100vh-300px)] space-y-1 overflow-y-auto">
+                    <div className="max-h-[200px] space-y-1 overflow-y-auto md:max-h-[calc(100vh-300px)]">
                         {queue.map((song, idx) => (
                             <div
                                 key={song.hash}
@@ -197,13 +197,13 @@ export function LyricsPage() {
             {/* Lyrics scroll */}
             <div
                 ref={containerRef}
-                className="flex-1 overflow-y-auto py-[30vh]"
+                className="flex-1 overflow-y-auto py-[20vh] md:py-[30vh]"
                 style={{
                     maskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                     WebkitMaskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                 }}
             >
-                <div className="space-y-4 px-4">
+                <div className="space-y-3 px-2 md:space-y-4 md:px-4">
                     {lyrics.map((line, i) => {
                         const isActive = i === activeIndex
                         const isPast = i < activeIndex
@@ -212,8 +212,8 @@ export function LyricsPage() {
                                 key={`${i}-${line.time}`}
                                 ref={isActive ? activeRef : undefined}
                                 className={cn(
-                                    'lyric-line cursor-default rounded-xl px-4 py-3 text-xl transition-all duration-500',
-                                    isActive && 'lyric-active text-2xl',
+                                    'lyric-line cursor-default rounded-xl px-3 py-2 text-base transition-all duration-500 md:px-4 md:py-3 md:text-xl',
+                                    isActive && 'lyric-active text-lg md:text-2xl',
                                     isPast && 'text-muted-foreground/50',
                                     !isActive && !isPast && 'text-muted-foreground/70'
                                 )}

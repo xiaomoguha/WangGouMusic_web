@@ -39,23 +39,23 @@ export function PlayerBar() {
 
     return (
         <footer
-            className="fixed bottom-0 left-[220px] right-0 z-40 border-t bg-card/90 backdrop-blur-md"
+            className="fixed bottom-16 left-0 right-0 z-40 border-t bg-card/90 backdrop-blur-md md:bottom-0 md:left-[220px]"
             style={{ boxShadow: 'var(--shadow-player)' }}
         >
-            <div className="flex h-20 items-center px-6">
+            <div className="flex h-16 items-center px-4 md:h-20 md:px-6">
                 {/* Song info */}
-                <div className="flex w-[260px] items-center gap-3">
+                <div className="flex w-[180px] items-center gap-2 md:w-[260px] md:gap-3">
                     <img
                         src={currentSong.cover}
                         alt={currentSong.title}
-                        className="h-12 w-12 rounded-xl object-cover shadow-sm"
+                        className="h-10 w-10 rounded-lg object-cover shadow-sm md:h-12 md:w-12 md:rounded-xl"
                         onError={e => { (e.target as HTMLImageElement).src = '/images/album-cover-1.png' }}
                     />
                     <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-foreground">
+                        <p className="truncate text-xs font-semibold text-foreground md:text-sm">
                             {currentSong.title}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">
+                        <p className="hidden truncate text-xs text-muted-foreground md:block">
                             {currentSong.artist}
                         </p>
                     </div>
@@ -63,7 +63,7 @@ export function PlayerBar() {
 
                 {/* Controls */}
                 <div className="flex flex-1 flex-col items-center gap-1.5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <Button variant="player-ghost" size="icon-sm" onClick={prevSong} aria-label="上一首">
                             <SkipBack className="h-4 w-4" />
                         </Button>
@@ -81,9 +81,9 @@ export function PlayerBar() {
                         </Button>
                     </div>
 
-                    {/* Progress */}
+                    {/* Progress - 手机端隐藏时间 */}
                     <div className="flex w-full max-w-[480px] items-center gap-2">
-                        <span className="w-10 text-right text-[11px] tabular-nums text-muted-foreground">
+                        <span className="hidden w-10 text-right text-[11px] tabular-nums text-muted-foreground md:block">
                             {formatTime(currentTime)}
                         </span>
                         <div
@@ -103,14 +103,14 @@ export function PlayerBar() {
                                 style={{ left: `${progress}%`, marginLeft: '-6px' }}
                             />
                         </div>
-                        <span className="w-10 text-[11px] tabular-nums text-muted-foreground">
+                        <span className="hidden w-10 text-[11px] tabular-nums text-muted-foreground md:block">
                             {formatTime(duration)}
                         </span>
                     </div>
                 </div>
 
                 {/* Volume & Playlist */}
-                <div className="flex w-[200px] items-center justify-end gap-2">
+                <div className="flex w-[100px] items-center justify-end gap-2 md:w-[200px]">
                     {/* Playlist button */}
                     <Button
                         variant="ghost"
@@ -121,16 +121,18 @@ export function PlayerBar() {
                     >
                         <ListMusic className="h-4 w-4" />
                     </Button>
+                    {/* 音量控制 - 手机端隐藏 */}
                     <Button
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
                         aria-label="静音"
+                        className="hidden md:flex"
                     >
                         {volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                     </Button>
                     <div
-                        className="group relative h-1 w-20 cursor-pointer rounded-full bg-muted"
+                        className="group relative h-1 w-20 cursor-pointer rounded-full bg-muted hidden md:block"
                         onClick={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect()
                             const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
