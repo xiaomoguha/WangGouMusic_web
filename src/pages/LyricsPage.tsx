@@ -28,7 +28,10 @@ export function LyricsPage() {
             const containerHeight = container.clientHeight
             const elTop = el.offsetTop
             const elHeight = el.clientHeight
-            const scrollTarget = elTop - containerHeight / 2 + elHeight / 2
+            // 手机端让高亮部分显示在屏幕下方 5% 位置（避开专辑图），桌面端居中
+            const isMobile = window.innerWidth < 768
+            const offsetRatio = isMobile ? 0.05 : 0.5
+            const scrollTarget = elTop - containerHeight * offsetRatio + elHeight / 2
 
             container.scrollTo({
                 top: scrollTarget,
@@ -108,7 +111,7 @@ export function LyricsPage() {
                     <img
                         src={currentSong.cover}
                         alt={currentSong.title}
-                        className={cn('h-40 w-40 rounded-full object-cover shadow-xl md:h-56 md:w-56', isPlaying && 'vinyl-spin')}
+                        className={cn('h-24 w-24 rounded-full object-cover shadow-xl md:h-56 md:w-56', isPlaying && 'vinyl-spin')}
                         onError={e => { (e.target as HTMLImageElement).src = '/images/album-cover-1.png' }}
                     />
                     {isPlaying && (
@@ -197,7 +200,7 @@ export function LyricsPage() {
             {/* Lyrics scroll */}
             <div
                 ref={containerRef}
-                className="flex-1 overflow-y-auto py-[20vh] md:py-[30vh]"
+                className="flex-1 overflow-y-auto pt-[45vh] pb-[10vh] md:py-[30vh]"
                 style={{
                     maskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                     WebkitMaskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
