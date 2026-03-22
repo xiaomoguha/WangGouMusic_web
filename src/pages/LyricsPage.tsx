@@ -131,10 +131,10 @@ export function LyricsPage() {
                 <p className="mt-1 text-center text-sm text-muted-foreground">
                     {currentSong.artist}{currentSong.album ? ` · ${currentSong.album}` : ''}
                 </p>
-                {/* Playlist toggle button */}
+                {/* Playlist toggle button - 手机端隐藏 */}
                 <button
                     onClick={() => setShowPlaylist(!showPlaylist)}
-                    className="mt-3 flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground md:mt-4"
+                    className="mt-3 hidden items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground md:mt-4 md:flex"
                 >
                     <ListMusic className="h-4 w-4" />
                     播放列表 ({queue.length})
@@ -198,7 +198,7 @@ export function LyricsPage() {
             {/* Lyrics scroll - 手机端使用绝对定位从专辑区域下方开始 */}
             <div
                 ref={containerRef}
-                className="absolute bottom-0 left-0 right-0 top-[180px] overflow-y-auto md:relative md:top-0 md:py-[30vh]"
+                className="absolute bottom-0 left-0 right-0 top-[140px] overflow-y-auto md:relative md:top-0 md:py-[30vh]"
                 style={{
                     maskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
                     WebkitMaskImage: 'linear-gradient(transparent, black 15%, black 85%, transparent)',
