@@ -1,7 +1,7 @@
-const BASE = '/api'
+const BASE = 'https://xjt-togethertracks.top/api'
 
 async function request<T>(path: string, params?: Record<string, string | number>): Promise<T> {
-    const url = new URL(path, window.location.origin)
+    const url = new URL(`${BASE}${path}`)
     if (params) {
         Object.entries(params).forEach(([k, v]) => {
             if (v !== undefined && v !== null && v !== '') {
@@ -125,39 +125,39 @@ export interface HotKeyword {
 // ========== API Functions ==========
 
 export async function searchSongs(keywords: string, page = 1, pagesize = 30): Promise<SearchResult> {
-    return request<SearchResult>(`${BASE}/search`, { keywords, page, pagesize })
+    return request<SearchResult>('/search', { keywords, page, pagesize })
 }
 
 export async function getSongUrl(hash: string, albumId?: string): Promise<SongUrlResult> {
     const params: Record<string, string | number> = { hash }
     if (albumId) params.album_id = albumId
-    return request<SongUrlResult>(`${BASE}/song/url`, params)
+    return request<SongUrlResult>('/song/url', params)
 }
 
 export async function searchLyric(hash: string, albumAudioId?: number): Promise<LyricSearchResult> {
     const params: Record<string, string | number> = { hash }
     if (albumAudioId) params.album_audio_id = albumAudioId
-    return request<LyricSearchResult>(`${BASE}/search/lyric`, params)
+    return request<LyricSearchResult>('/search/lyric', params)
 }
 
 export async function getLyric(id: string, accesskey: string): Promise<LyricResult> {
-    return request<LyricResult>(`${BASE}/lyric`, { id, accesskey, fmt: 'lrc', decode: 'true' })
+    return request<LyricResult>('/lyric', { id, accesskey, fmt: 'lrc', decode: 'true' })
 }
 
 export async function getTopSongs(): Promise<{ data: TopSongItem[]; total: number }> {
-    return request(`${BASE}/top/song`)
+    return request('/top/song')
 }
 
 export async function getRankList(): Promise<{ data: { info: RankListItem[] } }> {
-    return request(`${BASE}/rank/list`, { withsong: 1 })
+    return request('/rank/list', { withsong: 1 })
 }
 
 export async function getRankAudio(rankid: number, page = 1, pagesize = 30) {
-    return request<{ data: { total: number; songlist: TopSongItem[] } }>(`${BASE}/rank/audio`, { rankid, page, pagesize })
+    return request<{ data: { total: number; songlist: TopSongItem[] } }>('/rank/audio', { rankid, page, pagesize })
 }
 
 export async function getTopPlaylists(categoryId = 0, page = 1, pagesize = 6) {
-    return request<{ data: { special_list: PlaylistItem[] } }>(`${BASE}/top/playlist`, {
+    return request<{ data: { special_list: PlaylistItem[] } }>('/top/playlist', {
         category_id: categoryId,
         withsong: 0,
         page,
@@ -188,7 +188,7 @@ export interface PlaylistTrackResult {
 }
 
 export async function getPlaylistTracks(id: string, page = 1, pagesize = 30): Promise<PlaylistTrackResult> {
-    return request<PlaylistTrackResult>(`${BASE}/playlist/track/all`, { id, page, pagesize })
+    return request<PlaylistTrackResult>('/playlist/track/all', { id, page, pagesize })
 }
 
 export function normalizePlaylistTrack(item: PlaylistTrackItem): NormalizedSong {
@@ -211,7 +211,7 @@ export function normalizePlaylistTrack(item: PlaylistTrackItem): NormalizedSong 
 }
 
 export async function getHotSearch(): Promise<{ data: { list: { keywords: HotKeyword[] }[] } }> {
-    return request(`${BASE}/search/hot`)
+    return request('/search/hot')
 }
 
 export interface SuggestRecord {
@@ -231,11 +231,11 @@ export interface SuggestResult {
 }
 
 export async function getSearchSuggest(keywords: string): Promise<SuggestResult> {
-    return request<SuggestResult>(`${BASE}/search/suggest`, { keywords })
+    return request<SuggestResult>('/search/suggest', { keywords })
 }
 
 export async function searchTwo(page = 1, pagesize = 30): Promise<SearchResult> {
-    return request<SearchResult>(`${BASE}/searchtwo`, { page, pagesize })
+    return request<SearchResult>('/searchtwo', { page, pagesize })
 }
 
 // ========== Helpers ==========
